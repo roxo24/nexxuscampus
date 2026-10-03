@@ -1,17 +1,23 @@
 from flask import Flask
+from flask_cors import CORS
+
 from routes.proyectos import projects_bp
 
 app = Flask(__name__)
+
+CORS(
+    app,
+    resources={r"/api/*": {"origins": "http://localhost:5173"}}
+)
+
 app.register_blueprint(projects_bp)
 
 @app.route("/")
 def home():
-    return {
-        "message": "NexusCampus Backend funcionando"
-    }
-
+    return {"message": "NexusCampus Backend funcionando"}
 
 if __name__ == "__main__":
+<<<<<<< HEAD
     app.run(debug=True)
 
 # backend/app.py
@@ -45,3 +51,6 @@ def activar_whatsapp(proyecto_id):
     conn.close()
 
     return jsonify({"status": "success", "enlace_whatsapp": link_whatsapp})
+=======
+    app.run(debug=True, port=5001)
+>>>>>>> 9ec72e0b4b17b4d41a095e1e36b33a59a45fa601
