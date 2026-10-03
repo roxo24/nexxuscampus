@@ -1,37 +1,23 @@
 const API_URL = "http://localhost:5001/api";
 
-async function request(endpoint, options = {}) {
-  const response = await fetch(`${API_URL}${endpoint}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options.headers || {}),
-    },
-    ...options,
-  });
+export async function getProyectos() {
+    const res = await fetch(`${API_URL}/projects`);
 
-  const data = await response.json();
+    if (!res.ok) {
+        throw new Error("No se pudieron obtener los proyectos");
+    }
 
-  if (!response.ok) {
-    throw new Error(data.error || "Error al comunicarse con el backend");
-  }
+    const data = await res.json();
 
-  return data;
+    return data.projects;
 }
 
-export async function getProyectos(filters = {}) {
-  const params = new URLSearchParams();
+export async function getProyecto(id) {
+    const res = await fetch(`${API_URL}/projects/${id}`);
 
-  if (filters.sector) params.set("sector", filters.sector);
-  if (filters.nivel_madurez) params.set("nivel_madurez", filters.nivel_madurez);
+    if (!res.ok) {
+        throw new Error("No se pudo obtener el proyecto");
+    }
 
-  const query = params.toString();
-  return request(`/projects${query ? `?${query}` : ""}`);
-}
-
-export async function getProyecto(projectId) {
-  return request(`/projects/${projectId}`);
-}
-
-export async function getTalento() {
-  return request("/talento");
+    return await res.json();
 }
