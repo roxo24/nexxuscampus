@@ -4,17 +4,6 @@
 
 PRAGMA foreign_keys = ON;
 
--- --------------------------------------------------------
--- 1. TABLA UNIVERSIDADES (Estructura inicial vacía)
--- --------------------------------------------------------
-CREATE TABLE IF NOT EXISTS universidades (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    nombre VARCHAR(150) NOT NULL UNIQUE,
-    siglas VARCHAR(20) NOT NULL UNIQUE,
-    dominio_correo VARCHAR(100) NOT NULL,
-    sede_principal VARCHAR(100),
-    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP
-);
 
 -- --------------------------------------------------------
 -- 2. TABLA CARRERAS
