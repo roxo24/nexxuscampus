@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { Button, Chip, Avatar } from '../components/ui';
-import { ventures, talent } from '../data/mock';
+import { ventures as initialVentures, talent as initialTalent } from '../data/mock';
+import { getTalento, getProyectos } from '../services/api';
 
-export function Explore({ onInvite, onOpenProject }: { onInvite: (person?: typeof talent[number]) => void; onOpenProject: (project: typeof ventures[number]) => void }) {
+export function Explore({ onInvite, onOpenProject }: { onInvite: (person?: typeof initialTalent[number]) => void; onOpenProject: (project: typeof initialVentures[number]) => void }) {
   const [tab, setTab] = useState('ai');
   const [resultVersion, setResultVersion] = useState(0);
   const [selected, setSelected] = useState(['Finanzas', 'Diseño UX']);
@@ -13,6 +14,28 @@ export function Explore({ onInvite, onOpenProject }: { onInvite: (person?: typeo
   const [activeMatch, setActiveMatch] = useState(0);
   const [carouselDirection, setCarouselDirection] = useState<'next' | 'previous'>('next');
   const [ventureIndex, setVentureIndex] = useState(0);
+  const [talentos, setTalentos] = useState(initialTalent);
+  const [proyectos, setProyectos] = useState(initialVentures);
+
+  useEffect(() => {
+    async function cargarDatos() {
+      try {
+        const [talentoData, proyectosData] = await Promise.allSettled([
+          getTalento(),
+          getProyectos()
+        ]);
+        if (talentoData.status === 'fulfilled' && talentoData.value.length > 0) {
+          setTalentos(talentoData.value);
+        }
+        if (proyectosData.status === 'fulfilled' && proyectosData.value.length > 0) {
+          setProyectos(proyectosData.value);
+        }
+      } catch (err) {
+        console.log('Explore: usando datos locales');
+      }
+    }
+    cargarDatos();
+  }, []);
   const skillAliases: Record<string, string[]> = {
     'Desarrollo web': ['react', 'python', 'frontend', 'typescript', 'apis'],
     'Diseño UX': ['ux research', 'figma', 'branding', 'ui/ux'],
@@ -24,7 +47,7 @@ export function Explore({ onInvite, onOpenProject }: { onInvite: (person?: typeo
   const normalizeSearch = (value: string) => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase();
   const visibleTalent = useMemo(() => {
     const query = normalizeSearch(appliedQuery.trim());
-    return talent.filter(person => {
+    return talentos.filter(person => {
       const normalizedCareer = normalizeSearch(person.career);
       const searchable = normalizeSearch(`${person.career} ${person.skills.join(' ')}`);
       const queryMatches = !query || searchable.includes(query);
@@ -91,16 +114,16 @@ export function Explore({ onInvite, onOpenProject }: { onInvite: (person?: typeo
       <span className="ai-carousel-count">0{activeMatch + 1} / 0{visibleTalent.length}</span>
     </section> : <section className="talent-search-empty"><span><Icon name="search" size={25}/></span><h2>No encontramos perfiles con esos filtros</h2><p>Prueba retirando una habilidad o utiliza un término más amplio.</p><Button variant="secondary" onClick={() => { setSelected([]); setSearchQuery(''); setAppliedQuery(''); refreshResults(); }}>Mostrar todos los perfiles</Button></section>}
     <section className="discover-ventures">
-      <div className="section-heading"><div><div className="eyebrow">IDEAS EN MOVIMIENTO</div><h2>Emprendimientos que buscan talento</h2><p>Descubre proyectos activos y encuentra dónde puede generar mayor impacto tu experiencia.</p></div><div className="carousel-controls"><button aria-label="Proyecto anterior" onClick={() => setVentureIndex(current => (current - 1 + ventures.length) % ventures.length)}><Icon name="chevronLeft" size={20}/></button><button aria-label="Siguiente proyecto" onClick={() => setVentureIndex(current => (current + 1) % ventures.length)}><Icon name="chevronRight" size={20}/></button></div></div>
+      <div className="section-heading"><div><div className="eyebrow">IDEAS EN MOVIMIENTO</div><h2>Emprendimientos que buscan talento</h2><p>Descubre proyectos activos y encuentra dónde puede generar mayor impacto tu experiencia.</p></div><div className="carousel-controls"><button aria-label="Proyecto anterior" onClick={() => setVentureIndex(current => (current - 1 + proyectos.length) % proyectos.length)}><Icon name="chevronLeft" size={20}/></button><button aria-label="Siguiente proyecto" onClick={() => setVentureIndex(current => (current + 1) % proyectos.length)}><Icon name="chevronRight" size={20}/></button></div></div>
       <div className="discover-venture-viewport">
         <div className={`discover-venture-track venture-index-${ventureIndex}`}>
-          {ventures.map((venture, index) => <article className={`discover-venture-card ${index === ventureIndex ? 'active' : ''}`} key={venture.name}>
+          {proyectos.map((venture, index) => <article className={`discover-venture-card ${index === ventureIndex ? 'active' : ''}`} key={venture.name}>
             <img src={venture.image} alt={`Equipo de ${venture.name}`}/><div className="discover-venture-overlay"/>
             <div className="discover-venture-content"><div><span>{venture.category}</span>{index === 0 && <em>Destacado</em>}</div><h3>{venture.name}</h3><p>{venture.copy}</p><footer><small>{venture.progress}</small><button onClick={() => onOpenProject(venture)}>Conocer proyecto <Icon name="arrow" size={15}/></button></footer></div>
           </article>)}
         </div>
       </div>
-      <div className="discover-venture-dots">{ventures.map((venture, index) => <button key={venture.name} className={index === ventureIndex ? 'active' : ''} aria-label={`Ver ${venture.name}`} onClick={() => setVentureIndex(index)}/>)}</div>
+      <div className="discover-venture-dots">{proyectos.map((venture, index) => <button key={venture.name} className={index === ventureIndex ? 'active' : ''} aria-label={`Ver ${venture.name}`} onClick={() => setVentureIndex(index)}/>)}</div>
     </section>
   </div>;
 }

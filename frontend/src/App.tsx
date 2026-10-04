@@ -10,12 +10,16 @@ export default function App() {
   const [stage, setStage] = useState<'onboarding' | 'loading' | 'suggestions' | 'app'>('onboarding');
   const [entryScreen, setEntryScreen] = useState<Screen>('talent');
   const [initialConnections, setInitialConnections] = useState<number[]>([]);
-  const beginMatching = () => {
+  const [currentStudent, setCurrentStudent] = useState<any>(null);
+
+  const beginMatching = (student?: any) => {
+    if (student) setCurrentStudent(student);
     setStage('loading');
     window.setTimeout(() => setStage('suggestions'), 2800);
   };
+
   if (stage === 'loading') return <AiLoadingScreen/>;
   if (stage === 'suggestions') return <SuggestedProfiles onContinue={connections => { setInitialConnections(connections); setEntryScreen(connections.length > 0 ? 'partners' : 'talent'); setStage('app'); }} onBack={() => setStage('onboarding')}/>;
-  if (stage === 'app') return <AppShell initialScreen={entryScreen} initialConnections={initialConnections}/>;
+  if (stage === 'app') return <AppShell initialScreen={entryScreen} initialConnections={initialConnections} student={currentStudent}/>;
   return <Onboarding onComplete={beginMatching}/>;
 }
