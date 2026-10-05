@@ -4,10 +4,12 @@ import { SkillCard } from '../components/OnboardingParts';
 import { Button, Avatar, Stars } from '../components/ui';
 import { hardSkills, softSkills } from '../data/mock';
 
-export function Profile() {
+export function Profile({ student }: { student?: any }) {
   const [skills, setSkills] = useState(['UX Research','React','Comunicación']);
+  const nombre = student ? `${student.nombres} ${student.apellidos}` : 'Camila Torres';
+  const carrera = student ? `${student.carrera} · ${student.ciclo || 8}.º ciclo` : 'Ingeniería Empresarial · 8.º ciclo';
   return <div className="page profile-page">
-    <section className="profile-cover"><div className="profile-cover-pattern"/><div className="profile-identity"><Avatar label="Camila Torres" color="coral"/><div><span className="status active">Perfil activo y verificado</span><h1>Camila Torres</h1><p>Ingeniería Empresarial · 8.º ciclo</p><small>Piura, Perú · Buscando equipo</small></div></div><div className="profile-cover-actions"><Button variant="secondary">Vista previa pública</Button><Button icon="check">Guardar cambios</Button></div></section>
+    <section className="profile-cover"><div className="profile-cover-pattern"/><div className="profile-identity"><Avatar label={nombre} color="coral"/><div><span className="status active">Perfil activo y verificado</span><h1>{nombre}</h1><p>{carrera}</p><small>Piura, Perú · Buscando equipo</small></div></div><div className="profile-cover-actions"><Button variant="secondary">Vista previa pública</Button><Button icon="check">Guardar cambios</Button></div></section>
     <div className="profile-layout">
       <main className="profile-main">
         <section className="profile-section"><div className="profile-section-head"><div><span>01</span><div><h2>Sobre mí</h2><p>Una introducción breve para futuros equipos.</p></div></div><button>Editar</button></div><p className="profile-bio">Me interesa convertir problemas cotidianos en productos digitales simples y útiles. Disfruto investigar con usuarios, ordenar ideas y colaborar con perfiles técnicos y creativos.</p><div className="profile-meta-grid"><span><small>OBJETIVO ACTUAL</small><b>Sumarme a un equipo</b></span><span><small>ÁREA DE INTERÉS</small><b>Producto y sostenibilidad</b></span><span><small>IDIOMAS</small><b>Español · Inglés B2</b></span></div></section>

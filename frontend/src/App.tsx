@@ -19,7 +19,7 @@ export default function App() {
   };
 
   if (stage === 'loading') return <AiLoadingScreen/>;
-  if (stage === 'suggestions') return <SuggestedProfiles onContinue={connections => { setInitialConnections(connections); setEntryScreen(connections.length > 0 ? 'partners' : 'talent'); setStage('app'); }} onBack={() => setStage('onboarding')}/>;
+  if (stage === 'suggestions') return <SuggestedProfiles student={currentStudent} onContinue={connections => { setInitialConnections(connections); setEntryScreen(connections.length > 0 ? 'partners' : 'talent'); setStage('app'); }} onBack={() => setStage('onboarding')}/>;
   if (stage === 'app') return <AppShell initialScreen={entryScreen} initialConnections={initialConnections} student={currentStudent}/>;
   return <Onboarding onComplete={beginMatching}/>;
 }

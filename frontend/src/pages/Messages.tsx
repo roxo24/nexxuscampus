@@ -104,6 +104,11 @@ export function Messages({ onLeave, initialProject }: { onLeave: () => void; ini
   const rooms = baseRooms.some(room => room[0] === initialProject) ? baseRooms : [[initialProject,'Conexión nueva · Chat disponible','Ahora','1'],...baseRooms];
   const directPerson = talent.find(person => person.name === activeRoom);
 
+  const getInitials = (text?: string) => {
+    if (!text) return 'NC';
+    return text.split(/\s+/).filter(Boolean).map(x => x[0]?.toUpperCase() || '').slice(0, 2).join('') || 'NC';
+  };
+
   return <div className="chat-layout chat-polished">
     <aside className="rooms">
       <div className="rooms-head">
@@ -120,7 +125,7 @@ export function Messages({ onLeave, initialProject }: { onLeave: () => void; ini
           onClick={() => setActiveRoom(r[0])} 
           key={r[0]}
         >
-          <div className="project-logo">{r[0].split(' ').map(x=>x[0]).join('').slice(0,2)}</div>
+          <div className="project-logo">{getInitials(r[0])}</div>
           <span>
             <b>{r[0]}</b>
             <small>{r[1]}</small>
@@ -133,7 +138,7 @@ export function Messages({ onLeave, initialProject }: { onLeave: () => void; ini
     <section className="conversation">
       <header>
         <div>
-          <div className="project-logo">{activeRoom.split(' ').map(x=>x[0]).join('').slice(0,2)}</div>
+          <div className="project-logo">{getInitials(activeRoom)}</div>
           <span>
             <h2>{activeRoom}</h2>
             <p><i/> {directPerson ? 'Conexión confirmada · Chat directo' : 'Chat oficial del equipo · NexusCampus'}</p>

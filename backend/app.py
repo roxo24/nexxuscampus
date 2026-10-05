@@ -7,6 +7,7 @@ from routes.auth import auth_bp
 from routes.chats import chats_bp
 from routes.salida import salida_bp
 from routes.solicitudes import solicitudes_bp
+from routes.ai_matching import ai_bp
 
 app = Flask(__name__)
 
@@ -23,6 +24,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(chats_bp)
 app.register_blueprint(salida_bp)
 app.register_blueprint(solicitudes_bp)
+app.register_blueprint(ai_bp)
 
 @app.route("/")
 def home():

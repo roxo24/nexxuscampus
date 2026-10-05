@@ -2,9 +2,17 @@ import { useEffect, useState } from 'react';
 import { Icon } from '../components/Icon';
 import { Avatar } from '../components/ui';
 import { talent as initialTalent } from '../data/mock';
-import { getTalento } from '../services/api';
+import { getTalento, smartMatchComplementario } from '../services/api';
 
-export function Partners({ initialConnected, onChat }: { initialConnected: number[]; onChat: (person: string) => void }) {
+export function Partners({ 
+  student, 
+  initialConnected, 
+  onChat 
+}: { 
+  student?: any; 
+  initialConnected: number[]; 
+  onChat: (person: string) => void 
+}) {
   const [talentos, setTalentos] = useState(initialTalent);
   const [connected, setConnected] = useState<number[]>(initialConnected);
   const [notice, setNotice] = useState('');
@@ -12,6 +20,16 @@ export function Partners({ initialConnected, onChat }: { initialConnected: numbe
   useEffect(() => {
     async function cargar() {
       try {
+        if (student?.carrera) {
+          const recs = await smartMatchComplementario(
+            student.carrera,
+            student.hard_skills || student.skills || []
+          );
+          if (recs && recs.length > 0) {
+            setTalentos(recs);
+            return;
+          }
+        }
         const data = await getTalento();
         if (data && data.length > 0) {
           setTalentos(data);
@@ -21,7 +39,7 @@ export function Partners({ initialConnected, onChat }: { initialConnected: numbe
       }
     }
     cargar();
-  }, []);
+  }, [student]);
 
   const connect = (person: any) => {
     if (connected.includes(person.id)) return;
@@ -34,11 +52,12 @@ export function Partners({ initialConnected, onChat }: { initialConnected: numbe
     <div className="partners-toolbar"><div><span><Icon name="spark" size={16}/> Matching inteligente activo</span><small>La institución permanece oculta hasta que ambas partes acepten conectar.</small></div><div className="partner-avatars">{talentos.slice(0,4).map(person => <Avatar key={person.id} label={person.name} color={person.color} small/>)}<span>+{Math.max(0, talentos.length - 4)}</span></div></div>
     <section className="partners-grid">{talentos.map(person => {
       const isConnected = connected.includes(person.id);
+      const skills = Array.isArray(person?.skills) ? person.skills : [];
       return <article className={`partner-card ${isConnected ? 'connected' : ''}`} key={person.id}>
         <div className="partner-card-top"><span className="partner-avatar-wrap"><Avatar label={person.name} color={person.color}/><i>{person.match}%</i></span><span className="partner-match"><Icon name="spark" size={13}/> Match recomendado</span></div>
         <div><h2>{person.name}</h2><p>{person.career} · {person.cycle}</p></div>
-        <div className="partner-skills">{person.skills.map(skill => <span key={skill}>{skill}</span>)}</div>
-        <div className="partner-insight"><small>POR QUÉ PODRÍAN CONECTAR</small><p>{person.id % 3 === 0 ? 'Aporta una perspectiva analítica que complementa tus decisiones de producto.' : person.id % 2 === 0 ? 'Sus habilidades creativas pueden fortalecer la experiencia y comunicación de tu idea.' : 'Su perfil combina ejecución, estrategia y una alta afinidad con tus intereses.'}</p></div>
+        <div className="partner-skills">{skills.map((skill: string) => <span key={skill}>{skill}</span>)}</div>
+        <div className="partner-insight"><small>POR QUÉ PODRÍAN CONECTAR</small><p>{person.ai_reason || (person.id % 3 === 0 ? 'Aporta una perspectiva analítica que complementa tus decisiones de producto.' : person.id % 2 === 0 ? 'Sus habilidades creativas pueden fortalecer la experiencia y comunicación de tu idea.' : 'Su perfil combina ejecución, estrategia y una alta afinidad con tus intereses.')}</p></div>
         <button className={isConnected ? 'chat-ready' : ''} onClick={() => isConnected ? onChat(person.name) : connect(person)}>{isConnected ? <Icon name="chat" size={16}/> : null} {isConnected ? 'Chatear' : 'Conectar'}</button>
       </article>;
     })}</section>

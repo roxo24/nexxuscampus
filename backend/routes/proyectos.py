@@ -211,6 +211,8 @@ def get_talento():
     habilidad = request.args.get("habilidad")
     search = request.args.get("search", "").strip()
 
+    exclude_id = request.args.get("exclude_id")
+
     conn = get_db_connection()
     query = """
         SELECT u.id, u.nombres || ' ' || substr(u.apellidos, 1, 1) || '.' as name,
@@ -223,6 +225,9 @@ def get_talento():
     """
     params = []
 
+    if exclude_id:
+        query += " AND u.id != ?"
+        params.append(exclude_id)
     if carrera:
         query += " AND c.nombre LIKE ?"
         params.append(f"%{carrera}%")
@@ -250,11 +255,14 @@ def get_talento():
         if habilidad and not any(habilidad.lower() in s.lower() for s in u_dict["skills"]):
             continue
 
+        rating = float(u_dict.get("rating") or 4.8)
         u_dict["cycle"] = f"{u_dict['ciclo']}º ciclo" if u_dict.get("ciclo") else "7º ciclo"
-        u_dict["match"] = max(80, 98 - (index * 3))
+        # Match dinámico calculado por reputación y perfil completo
+        u_dict["match"] = min(98, max(78, int(70 + (rating - 4.5) * 40 + (len(u_dict["skills"]) * 3))))
         u_dict["color"] = colores[index % len(colores)]
         u_dict["availability"] = "Lun, mié y vie · Tardes" if index % 2 == 0 else "Mar y jue · Noches"
         talentos.append(u_dict)
 
     conn.close()
+    talentos.sort(key=lambda x: (x["match"], x["rating"]), reverse=True)
     return jsonify({"talento": talentos, "total": len(talentos)})

@@ -64,6 +64,25 @@ export async function getTalento(filters = {}) {
   return data.talento || [];
 }
 
+export async function buscarTalentoPorIA(descripcion) {
+  const data = await request("/ai/buscar-por-descripcion", {
+    method: "POST",
+    body: JSON.stringify({ descripcion })
+  });
+  return data;
+}
+
+export async function smartMatchComplementario(liderCarrera, habilidades = []) {
+  const data = await request("/ai/smart-match", {
+    method: "POST",
+    body: JSON.stringify({ 
+      lider_carrera: liderCarrera,
+      habilidades_necesarias: habilidades
+    })
+  });
+  return data.recomendaciones || [];
+}
+
 // -------------------------------------------------------------
 // 3. AUTENTICACIÓN, PADRÓN UNP Y ONBOARDING (CU-00)
 // -------------------------------------------------------------
